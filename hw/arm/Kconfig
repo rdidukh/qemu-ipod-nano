@@ -675,3 +675,8 @@ config ARMSSE
     select UNIMP
     select SSE_COUNTER
     select SSE_TIMER
+
+config IPOD_NANO_1G
+    bool
+    default y
+    depends on TCG && ARM
