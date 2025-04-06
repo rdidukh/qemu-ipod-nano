@@ -10,7 +10,7 @@ make -j16
 # Run
 
 ```
-./qemu-system-arm -M virt,firmware=osos.bin -nographic -S -s
+./qemu-system-arm -M ipod-nano-1g,firmware=osos.bin -nographic -S -s
 
-gdb-multiarch -ex "target remote localhost:1234"
+gdb-multiarch -x .gdbinit
 ```

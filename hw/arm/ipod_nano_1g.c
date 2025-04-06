@@ -1,7 +1,9 @@
 #include "hw/arm/ipod_nano_1g.h"
 
 #include "exec/address-spaces.h"
+#include "hw/loader.h"
 #include "qapi/error.h"
+#include "qemu/datadir.h"
 #include "qemu/error-report.h"
 #include "qemu/units.h"
 
@@ -11,11 +13,8 @@ static void ipod_nano_1g_init(MachineState *machine) {
 
   IPodNano1GMachineState *state = IPOD_NANO_1G_MACHINE(machine);
 
-  Object *cpuobj;
-  ARMCPU *armcpu;
-
-  cpuobj = object_new(machine->cpu_type);
-  armcpu = ARM_CPU(cpuobj);
+  Object *cpuobj = object_new(machine->cpu_type);
+  ARMCPU *armcpu = ARM_CPU(cpuobj);
 
   state->cpu = armcpu;
 
@@ -25,9 +24,33 @@ static void ipod_nano_1g_init(MachineState *machine) {
 
   object_unref(cpuobj);
 
-  MemoryRegion *sec = g_new(MemoryRegion, 1);
-  memory_region_init_ram(sec, NULL, "ram", machine->ram_size, &error_fatal);
-  memory_region_add_subregion(get_system_memory(), 0x0, sec);
+  MemoryRegion *ram = g_new(MemoryRegion, 1);
+  memory_region_init_ram(ram, NULL, "ram", machine->ram_size, &error_fatal);
+  memory_region_add_subregion(get_system_memory(), 0x0, ram);
+
+  info_report("firmware=%s", machine->firmware);
+
+  if (machine->firmware == NULL) {
+    error_report("firmware is required");
+    exit(1);
+  }
+
+  char *firmware_filename =
+      qemu_find_file(QEMU_FILE_TYPE_BIOS, machine->firmware);
+
+  if (!firmware_filename) {
+    error_report("Could not find firmare file '%s'", firmware_filename);
+    exit(1);
+  }
+
+  int image_size = load_image_mr(firmware_filename, ram);
+
+  if (image_size < 0) {
+    error_report("Could not load firmware image '%s'", firmware_filename);
+    exit(1);
+  }
+
+  g_free(firmware_filename);
 }
 
 static void ipod_nano_1g_machine_init(MachineClass *mc) {

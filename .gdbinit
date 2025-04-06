@@ -5,4 +5,18 @@
 #   add-auto-load-safe-path /path/to/qemu/.gdbinit
 
 # Load QEMU-specific sub-commands and settings
-source scripts/qemu-gdb.py
+
+set pagination off
+target remote localhost:1234
+
+tui new-layout vmdebug {-horizontal asm 1 regs 1} 2 cmd 1
+layout vmdebug
+focus cmd
+set confirm off
+
+break *0x04
+break *0x08
+break *0x0c
+break *0x10
+break *0x14
+
