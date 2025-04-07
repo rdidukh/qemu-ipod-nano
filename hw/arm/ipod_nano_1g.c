@@ -1,32 +1,54 @@
 #include "hw/arm/ipod_nano_1g.h"
 
 #include "exec/address-spaces.h"
+#include "hw/arm/pp5020-proc-id.h"
 #include "hw/loader.h"
 #include "qapi/error.h"
 #include "qemu/datadir.h"
 #include "qemu/error-report.h"
 #include "qemu/units.h"
 
-// TODO: init second CPU.
 static void ipod_nano_1g_init(MachineState *machine) {
   info_report("ipod_nano_1g_init");
 
   IPodNano1GMachineState *state = IPOD_NANO_1G_MACHINE(machine);
 
-  Object *cpuobj = object_new(machine->cpu_type);
-  ARMCPU *armcpu = ARM_CPU(cpuobj);
+  for (int cpu = 0; cpu < machine->smp.cpus; cpu++) {
+    Object *cpuobj = object_new(machine->cpu_type);
+    ARMCPU *armcpu = ARM_CPU(cpuobj);
 
-  state->cpu = armcpu;
+    state->cpu = armcpu;
 
-  if (!qdev_realize(DEVICE(armcpu), NULL, &error_abort)) {
-    return;
+    if (!qdev_realize(DEVICE(armcpu), NULL, &error_abort)) {
+      return;
+    }
+
+    object_unref(cpuobj);
   }
-
-  object_unref(cpuobj);
 
   MemoryRegion *ram = g_new(MemoryRegion, 1);
   memory_region_init_ram(ram, NULL, "ram", machine->ram_size, &error_fatal);
-  memory_region_add_subregion(get_system_memory(), 0x0, ram);
+  memory_region_add_subregion(get_system_memory(), IPOD_NANO_1G_RAM_BASE_ADDR,
+                              ram);
+
+  MemoryRegion *fastram = g_new(MemoryRegion, 1);
+  memory_region_init_ram(fastram, NULL, "fastram", IPOD_NANO_1G_FASTRAM_SIZE,
+                         &error_fatal);
+  memory_region_add_subregion(get_system_memory(),
+                              IPOD_NANO_1G_FASTRAM_BASE_ADDR, fastram);
+
+  // TODO: Don't care about cache control for now. Simply enable it as RAM
+  // intead of an memory mapped device.
+  MemoryRegion *mem_ctrl = g_new(MemoryRegion, 1);
+  memory_region_init_ram(mem_ctrl, NULL, "mem-ctrl",
+                         PP5020_MEMORY_CONTROL_MEM_SIZE, &error_fatal);
+  memory_region_add_subregion(get_system_memory(),
+                              PP5020_MEMORY_CONTROL_BASE_ADDR, mem_ctrl);
+
+  DeviceState *dev = qdev_new(TYPE_PP5020_PROC_ID);
+  PP5020ProcIdState *proc_id_state = PP5020_PROC_ID(dev);
+  memory_region_add_subregion(get_system_memory(), PP5020_PROC_ID_BASE_ADDR,
+                              &proc_id_state->iomem);
 
   info_report("firmware=%s", machine->firmware);
 
@@ -59,9 +81,9 @@ static void ipod_nano_1g_machine_init(MachineClass *mc) {
   mc->init = ipod_nano_1g_init;
   mc->min_cpus = 2;
   mc->max_cpus = 2;
-  mc->default_ram_size = 32 * MiB;
   mc->default_cpus = 2;
+  mc->default_ram_size = 32 * MiB;
   mc->default_cpu_type = ARM_CPU_TYPE_NAME("arm926");
 }
 
-DEFINE_MACHINE("ipod-nano-1g", ipod_nano_1g_machine_init)
+DEFINE_MACHINE(IPOD_NANO_1G_NAME, ipod_nano_1g_machine_init)
