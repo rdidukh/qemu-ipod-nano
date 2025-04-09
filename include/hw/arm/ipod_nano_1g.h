@@ -12,7 +12,7 @@
 #define IPOD_NANO_1G_NAME "ipod-nano-1g"
 #define TYPE_IPOD_NANO_1G_MACHINE MACHINE_TYPE_NAME(IPOD_NANO_1G_NAME)
 
-#define IPOD_NANO_1G_RAM_BASE_ADDR 0x0
+#define IPOD_NANO_1G_RAM_BASE_ADDR 0x10000000
 
 #define IPOD_NANO_1G_FASTRAM_BASE_ADDR 0x40000000
 #define IPOD_NANO_1G_FASTRAM_SIZE 96 * KiB
@@ -29,7 +29,7 @@ struct IPodNano1GMachineClass {
 
 struct IPodNano1GMachineState {
   MachineState parent;
-  ARMCPU *cpu;
+  ARMCPU *cpu[2];
 };
 
 #endif

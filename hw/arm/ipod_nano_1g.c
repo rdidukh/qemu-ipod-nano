@@ -1,30 +1,48 @@
 #include "hw/arm/ipod_nano_1g.h"
 
 #include "exec/address-spaces.h"
+#include "hw/arm/pp5020-proc-ctrl.h"
 #include "hw/arm/pp5020-proc-id.h"
 #include "hw/loader.h"
 #include "qapi/error.h"
 #include "qemu/datadir.h"
 #include "qemu/error-report.h"
 #include "qemu/units.h"
+#include "target/arm/internals.h"
 
 static void ipod_nano_1g_init(MachineState *machine) {
   info_report("ipod_nano_1g_init");
 
-  IPodNano1GMachineState *state = IPOD_NANO_1G_MACHINE(machine);
+  // IPodNano1GMachineState *state = IPOD_NANO_1G_MACHINE(machine);
 
   for (int cpu = 0; cpu < machine->smp.cpus; cpu++) {
     Object *cpuobj = object_new(machine->cpu_type);
     ARMCPU *armcpu = ARM_CPU(cpuobj);
 
-    state->cpu = armcpu;
+    // TODO: this causes Assertion `object_dynamic_cast(container,
+    // TYPE_CONTAINER)' failed
+    // state->cpu[cpu] = armcpu;
 
     if (!qdev_realize(DEVICE(armcpu), NULL, &error_abort)) {
       return;
     }
 
+    cpu_set_pc(CPU(armcpu), IPOD_NANO_1G_RAM_BASE_ADDR);
+
     object_unref(cpuobj);
   }
+
+  MemoryRegion *arm_vectors = g_new(MemoryRegion, 1);
+  memory_region_init_ram(arm_vectors, NULL, "arm-vectors", 0x100, &error_fatal);
+  memory_region_add_subregion(get_system_memory(), 0x0, arm_vectors);
+  uint32_t *vectors_data = memory_region_get_ram_ptr(arm_vectors);
+
+  for (int i = 0; i < 8; i++) {
+    vectors_data[i] = 0xea000006 - i;  // b idle
+  }
+  // idle:
+  vectors_data[8] = 0xe320f003;  // wfi
+  vectors_data[9] = 0xeafffffd;  // b idle
 
   MemoryRegion *ram = g_new(MemoryRegion, 1);
   memory_region_init_ram(ram, NULL, "ram", machine->ram_size, &error_fatal);
@@ -49,6 +67,11 @@ static void ipod_nano_1g_init(MachineState *machine) {
   PP5020ProcIdState *proc_id_state = PP5020_PROC_ID(dev);
   memory_region_add_subregion(get_system_memory(), PP5020_PROC_ID_BASE_ADDR,
                               &proc_id_state->iomem);
+
+  dev = qdev_new(TYPE_PP5020_PROC_CTRL);
+  PP5020ProcCtrlState *proc_ctrl_state = PP5020_PROC_CTRL(dev);
+  memory_region_add_subregion(get_system_memory(), PP5020_PROC_CTRL_BASE_ADDR,
+                              &proc_ctrl_state->iomem);
 
   info_report("firmware=%s", machine->firmware);
 

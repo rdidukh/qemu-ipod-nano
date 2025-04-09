@@ -4,11 +4,10 @@
 #include "qemu/error-report.h"
 
 static uint64_t pp5020_proc_id_read(void *opaque, hwaddr addr, unsigned size) {
-  info_report("pp5020_proc_id_read: %ld", addr);
-
   CPUState *cpu = current_cpu;
 
-  info_report("pp5020_proc_id_read: addr=%ld, cpu=%d", addr, cpu->cpu_index);
+  info_report("pp5020_proc_id_read: addr=%ld, callee=%d pc=0x%lx", addr,
+              cpu->cpu_index, cpu->cc->get_pc(cpu));
 
   switch (addr) {
     case 0x0:

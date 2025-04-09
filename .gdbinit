@@ -14,9 +14,22 @@ layout vmdebug
 focus cmd
 set confirm off
 
-break *0x04
-break *0x08
-break *0x0c
-break *0x10
-break *0x14
+break *0x40000068 thread 1
+command
+break *0x00 t 1
+break *0x04 t 1 
+break *0x08 t 1 
+break *0x0c t 1 
+break *0x10 t 1 
+break *0x14 t 1 
+end
 
+define lr
+    x/20i $lr-20
+end
+
+define pc
+    x/20i $pc-20
+end
+
+continue
