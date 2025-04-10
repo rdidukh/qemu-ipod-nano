@@ -22,6 +22,7 @@ typedef struct PP5020GpioState {
   SysBusDevice busdev;
   MemoryRegion iomem;
   uint32_t gpioa;
+  uint32_t gpiob;
 } PP5020GpioState;
 
 #endif
