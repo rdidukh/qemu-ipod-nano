@@ -5,6 +5,7 @@
 #include "hw/arm/pp5020-gpio.h"
 #include "hw/arm/pp5020-proc-ctrl.h"
 #include "hw/arm/pp5020-proc-id.h"
+#include "hw/arm/pp5020-timer.h"
 #include "hw/loader.h"
 #include "qapi/error.h"
 #include "qemu/datadir.h"
@@ -84,6 +85,11 @@ static void ipod_nano_1g_init(MachineState *machine) {
   PP5020GpioState *gpio_state = PP5020_GPIO(dev);
   memory_region_add_subregion(get_system_memory(), PP5020_GPIO_BASE_ADDR,
                               &gpio_state->iomem);
+
+  dev = qdev_new(TYPE_PP5020_TIMER);
+  PP5020TimerState *timer_state = PP5020_TIMER(dev);
+  memory_region_add_subregion(get_system_memory(), PP5020_TIMER_BASE_ADDR,
+                              &timer_state->iomem);
 
   info_report("firmware=%s", machine->firmware);
 
