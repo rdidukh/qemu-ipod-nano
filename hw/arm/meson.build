@@ -63,7 +63,12 @@ arm_ss.add(when: 'CONFIG_XEN', if_true: files(
   'xen-stubs.c',
   'xen-pvh.c',
 ))
-arm_ss.add(when: 'CONFIG_IPOD_NANO_1G', if_true: files('ipod_nano_1g.c', 'pp5020-proc-ctrl.c', 'pp5020-proc-id.c'))
+arm_ss.add(when: 'CONFIG_IPOD_NANO_1G', if_true: files(
+  'ipod_nano_1g.c', 
+  'pp5020-gpio.c', 
+  'pp5020-proc-ctrl.c', 
+  'pp5020-proc-id.c'
+))
 
 system_ss.add(when: 'CONFIG_ARM_SMMUV3', if_true: files('smmu-common.c'))
 system_ss.add(when: 'CONFIG_COLLIE', if_true: files('collie.c'))

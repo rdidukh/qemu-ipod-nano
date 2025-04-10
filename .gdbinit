@@ -32,4 +32,8 @@ define pc
     x/20i $pc-20
 end
 
+define con
+    target remote localhost:1234
+end
+
 continue
