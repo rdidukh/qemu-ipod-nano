@@ -69,6 +69,7 @@ arm_ss.add(when: 'CONFIG_IPOD_NANO_1G', if_true: files(
   'pp5020-gpio.c', 
   'pp5020-gpio-bitwise.c',
   'pp5020-i2c.c', 
+  'pp5020-ide-dma.c',
   'pp5020-proc-ctrl.c', 
   'pp5020-proc-id.c',
   'pp5020-timer.c'

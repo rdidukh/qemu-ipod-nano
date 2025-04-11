@@ -5,6 +5,7 @@
 #include "hw/arm/pp5020-gpio-bitwise.h"
 #include "hw/arm/pp5020-gpio.h"
 #include "hw/arm/pp5020-i2c.h"
+#include "hw/arm/pp5020-ide-dma.h"
 #include "hw/arm/pp5020-proc-ctrl.h"
 #include "hw/arm/pp5020-proc-id.h"
 #include "hw/arm/pp5020-timer.h"
@@ -108,6 +109,11 @@ static void ipod_nano_1g_init(MachineState *machine) {
   PP5020I2cState *i2c_state = PP5020_I2C(dev);
   memory_region_add_subregion(get_system_memory(), PP5020_I2C_BASE_ADDR,
                               &i2c_state->iomem);
+
+  dev = qdev_new(TYPE_PP5020_IDE_DMA);
+  PP5020IdeDmaState *ide_dma_state = PP5020_IDE_DMA(dev);
+  memory_region_add_subregion(get_system_memory(), PP5020_IDE_DMA_BASE_ADDR,
+                              &ide_dma_state->iomem);
 
   dev = qdev_new(TYPE_PP5020_TIMER);
   PP5020TimerState *timer_state = PP5020_TIMER(dev);
