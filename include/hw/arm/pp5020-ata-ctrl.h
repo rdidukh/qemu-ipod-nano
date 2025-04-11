@@ -6,6 +6,7 @@
 #include "qemu/osdep.h"
 // clang-format on
 
+#include "hw/arm/pp5020-ata.h"
 #include "hw/arm/pp5020-ide.h"
 #include "hw/sysbus.h"
 
@@ -18,7 +19,7 @@ OBJECT_DECLARE_SIMPLE_TYPE(PP5020AtaCtrlState, PP5020_ATA_CTRL)
 typedef struct PP5020AtaCtrlState {
   SysBusDevice busdev;
   MemoryRegion iomem;
-  uint32_t data;
+  uint32_t alternate_status;
 } PP5020AtaCtrlState;
 
 #endif
