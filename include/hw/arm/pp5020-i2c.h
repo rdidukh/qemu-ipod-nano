@@ -14,6 +14,8 @@ OBJECT_DECLARE_SIMPLE_TYPE(PP5020I2cState, PP5020_I2C)
 #define PP5020_I2C_BASE_ADDR 0x7000c000
 #define PP5020_I2C_MEM_SIZE 0x144
 
+#define PP5020_I2C_CLICKWHEEL_DATA 0x140
+
 typedef struct PP5020I2cState {
   SysBusDevice busdev;
   MemoryRegion iomem;

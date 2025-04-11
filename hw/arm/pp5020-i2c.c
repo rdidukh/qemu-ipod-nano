@@ -13,6 +13,11 @@ static uint64_t pp5020_i2c_read(void *opaque, hwaddr addr, unsigned size) {
     case 0x104:
     case 0x120:
       return 0;
+    case PP5020_I2C_CLICKWHEEL_DATA:
+      // [0..7] = 0x1a in normal operation, 0x00 when Hold is engaged
+      // [31]: always set unless Hold switch is engaged
+      // TODO: implement pressing actual buttons.
+      return 0x8000001a;
     default:
   }
 
