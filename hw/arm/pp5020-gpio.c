@@ -18,6 +18,12 @@ static uint64_t pp5020_gpio_read(void *opaque, hwaddr addr, unsigned size) {
     case PP5020_GPIO_OPERATION_ENABLE:
       assert(reg == PP5020_GPIO_REG_B);
       break;
+    case PP5020_GPIO_OPERATION_OUTPUT_ENABLE:
+      assert(reg == PP5020_GPIO_REG_B);
+      break;
+    case PP5020_GPIO_OPERATION_OUTPUT_VALUE:
+      assert(reg == PP5020_GPIO_REG_B);
+      break;
     case PP5020_GPIO_OPERATION_INPUT_VALUE:
       assert(reg == PP5020_GPIO_REG_A);
       break;
@@ -42,6 +48,12 @@ static void pp5020_gpio_write(void *opaque, hwaddr addr, uint64_t data,
 
   switch (operation) {
     case PP5020_GPIO_OPERATION_ENABLE:
+      assert(reg == PP5020_GPIO_REG_B);
+      break;
+    case PP5020_GPIO_OPERATION_OUTPUT_ENABLE:
+      assert(reg == PP5020_GPIO_REG_B);
+      break;
+    case PP5020_GPIO_OPERATION_OUTPUT_VALUE:
       assert(reg == PP5020_GPIO_REG_B);
       break;
     default:
