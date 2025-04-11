@@ -30,35 +30,25 @@ static void pp5020_gpio_bitwise_write(void *opaque, hwaddr addr, uint64_t data,
   uint32_t value = data & 0xff;
 
   PP5020GpioBitwiseState *state = PP5020_GPIO_BITWISE(opaque);
+  PP5020GpioState *gpio = state->gpio_state;
 
-  switch (addr) {
-    case PP5020_GPIO_B_ENABLE:
-      state->gpio_state->b_enabled =
-          apply_masked_value(state->gpio_state->b_enabled, mask, value);
-      return;
-    case PP5020_GPIO_D_ENABLE:
-      state->gpio_state->d_enabled =
-          apply_masked_value(state->gpio_state->d_enabled, mask, value);
-      return;
-    case PP5020_GPIO_B_OUTPUT_ENABLE:
-      state->gpio_state->b_output_enabled =
-          apply_masked_value(state->gpio_state->b_output_enabled, mask, value);
-      return;
-    case PP5020_GPIO_D_OUTPUT_ENABLE:
-      state->gpio_state->d_output_enabled =
-          apply_masked_value(state->gpio_state->d_output_enabled, mask, value);
-      return;
-    case PP5020_GPIO_B_OUTPUT_VALUE:
-      state->gpio_state->b_output_value =
-          apply_masked_value(state->gpio_state->b_output_value, mask, value);
-      return;
-    case PP5020_GPIO_D_OUTPUT_VALUE:
-      state->gpio_state->d_output_value =
-          apply_masked_value(state->gpio_state->d_output_value, mask, value);
-      return;
+  int group = PP5020_GPIO_GROUP(addr);
+  int operation = PP5020_GPIO_OPERATION(addr);
+  int reg = PP5020_GPIO_REG(addr);
+
+  info_report("  group=%d, operation=%d, reg=%d", group, operation, reg);
+
+  switch (operation) {
+    case PP5020_GPIO_OPERATION_ENABLE:
+    case PP5020_GPIO_OPERATION_OUTPUT_ENABLE:
+    case PP5020_GPIO_OPERATION_OUTPUT_VALUE:
+      break;
     default:
+      assert(false);
   }
-  assert(false);
+
+  gpio->values[group][operation][reg] =
+      apply_masked_value(gpio->values[group][operation][reg], mask, value);
 }
 
 static const MemoryRegionOps pp5020_gpio_bitwise_ops = {

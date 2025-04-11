@@ -4,25 +4,49 @@
 #include "qemu/error-report.h"
 
 static uint64_t pp5020_gpio_read(void *opaque, hwaddr addr, unsigned size) {
-  info_report("pp5020_gpio_read: addr=0x%lx, callee: %d pc=0x%lx", addr,
+  info_report("pp5020_gpio_read: addr=0x%lx, callee=%d, pc=0x%lx", addr,
               current_cpu->cpu_index, current_cpu->cc->get_pc(current_cpu));
   PP5020GpioState *state = PP5020_GPIO(opaque);
 
-  switch (addr) {
-    case PP5020_GPIO_A_INPUT_VALUE:
-      return state->a_input_value;
+  int group = PP5020_GPIO_GROUP(addr);
+  int operation = PP5020_GPIO_OPERATION(addr);
+  int reg = PP5020_GPIO_REG(addr);
+
+  info_report("  group=%d, operation=%d, reg=%d", group, operation, reg);
+
+  switch (operation) {
+    case PP5020_GPIO_OPERATION_ENABLE:
+      assert(reg == PP5020_GPIO_REG_B);
+      break;
+    case PP5020_GPIO_OPERATION_INPUT_VALUE:
+      assert(reg == PP5020_GPIO_REG_A);
+      break;
+    default:
+      assert(false);
   }
 
-  assert(false);
-  return 0;
+  return state->values[group][operation][reg];
 }
 
 static void pp5020_gpio_write(void *opaque, hwaddr addr, uint64_t data,
                               unsigned size) {
-  info_report("pp5020_gpio_write: addr=0x%lx, data=0x%lx callee: %d pc=0x%lx",
+  info_report("pp5020_gpio_write: addr=0x%lx, data=0x%lx callee=%d, pc=0x%lx",
               addr, data, current_cpu->cpu_index,
               current_cpu->cc->get_pc(current_cpu));
-  assert(false);
+
+  int group = PP5020_GPIO_GROUP(addr);
+  int operation = PP5020_GPIO_OPERATION(addr);
+  int reg = PP5020_GPIO_REG(addr);
+
+  info_report("  group=%d, operation=%d, reg=%d", group, operation, reg);
+
+  switch (operation) {
+    case PP5020_GPIO_OPERATION_ENABLE:
+      assert(reg == PP5020_GPIO_REG_B);
+      break;
+    default:
+      assert(false);
+  }
 }
 
 static const MemoryRegionOps pp5020_gpio_ops = {
@@ -34,13 +58,13 @@ static const MemoryRegionOps pp5020_gpio_ops = {
 static void pp5020_gpio_init(Object *obj) {
   PP5020GpioState *state = PP5020_GPIO(obj);
 
-  state->b_enabled = 0;
-  state->d_enabled = 0;
-  state->b_output_enabled = 0;
-  state->d_output_enabled = 0;
-  state->b_output_value = 0;
-  state->d_output_value = 0;
-  state->a_input_value = 0xffffffff;
+  memset(state->values, 0, sizeof(state->values));
+
+  for (int group = 0; group < PP5020_GPIO_GROUP_COUNT; group++) {
+    for (int reg = 0; reg < PP5020_GPIO_REGISTERS_PER_GROUP; reg++) {
+      state->values[group][PP5020_GPIO_OPERATION_INPUT_VALUE][reg] = 0xffffffff;
+    }
+  }
 
   SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
