@@ -49,6 +49,15 @@ static void ipod_nano_1g_init(MachineState *machine) {
   vectors_data[8] = 0xe320f003;  // wfi
   vectors_data[9] = 0xeafffffd;  // b idle
 
+  MemoryRegion *ipod_revision = g_new(MemoryRegion, 1);
+  memory_region_init_ram(ipod_revision, NULL, "ipod-revision", 0x4,
+                         &error_fatal);
+  memory_region_add_subregion(get_system_memory(), IPOD_HW_REVISION_ADDR,
+                              ipod_revision);
+  uint32_t *ipod_revision_data = memory_region_get_ram_ptr(ipod_revision);
+  // TODO: get it be retrieved from the firmware?
+  ipod_revision_data[0] = IPOD_NANO_1G_HW_REVISION;
+
   MemoryRegion *ram = g_new(MemoryRegion, 1);
   memory_region_init_ram(ram, NULL, "ram", machine->ram_size, &error_fatal);
   memory_region_add_subregion(get_system_memory(), IPOD_NANO_1G_RAM_BASE_ADDR,
