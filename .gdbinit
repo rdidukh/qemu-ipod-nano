@@ -25,7 +25,7 @@ break *0x14 t 1
 end
 
 define lr
-    x/20i $lr-20
+    x/20i $lr-40
 end
 
 define pc

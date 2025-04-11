@@ -6,17 +6,24 @@
 
 static uint64_t pp5020_gpio_bitwise_read(void *opaque, hwaddr addr,
                                          unsigned size) {
-  info_report("pp5020_gpio_bitwise_read: addr=0x%lx, callee: %d pc=0x%lx", addr,
+  info_report("pp5020_gpio_bitwise_read: addr=0x%lx, callee=%d, pc=0x%lx", addr,
               current_cpu->cpu_index, current_cpu->cc->get_pc(current_cpu));
 
   assert(false);
   return 0;
 }
 
+static uint32_t apply_masked_value(uint32_t current, uint32_t mask,
+                                   uint32_t value) {
+  current &= ~(mask & ~value);
+  current |= (mask & value);
+  return current;
+}
+
 static void pp5020_gpio_bitwise_write(void *opaque, hwaddr addr, uint64_t data,
                                       unsigned size) {
   info_report(
-      "pp5020_gpio_bitwise_write: addr=0x%lx, data=0x%lx callee: %d pc=0x%lx",
+      "pp5020_gpio_bitwise_write: addr=0x%lx, data=0x%lx callee=%d, pc=0x%lx",
       addr, data, current_cpu->cpu_index, current_cpu->cc->get_pc(current_cpu));
 
   uint32_t mask = (data >> 8) & 0xff;
@@ -24,17 +31,33 @@ static void pp5020_gpio_bitwise_write(void *opaque, hwaddr addr, uint64_t data,
 
   PP5020GpioBitwiseState *state = PP5020_GPIO_BITWISE(opaque);
 
-  uint32_t current;
-
   switch (addr) {
-    case GPIO_BITWISE_B_ENABLE:
-      current = state->gpio_state->gpiob;
-      current &= ~(mask & ~value);
-      current |= (mask & value);
-      state->gpio_state->gpiob = current;
+    case PP5020_GPIO_B_ENABLE:
+      state->gpio_state->b_enabled =
+          apply_masked_value(state->gpio_state->b_enabled, mask, value);
       return;
+    case PP5020_GPIO_D_ENABLE:
+      state->gpio_state->d_enabled =
+          apply_masked_value(state->gpio_state->d_enabled, mask, value);
+      return;
+    case PP5020_GPIO_B_OUTPUT_ENABLE:
+      state->gpio_state->b_output_enabled =
+          apply_masked_value(state->gpio_state->b_output_enabled, mask, value);
+      return;
+    case PP5020_GPIO_D_OUTPUT_ENABLE:
+      state->gpio_state->d_output_enabled =
+          apply_masked_value(state->gpio_state->d_output_enabled, mask, value);
+      return;
+    case PP5020_GPIO_B_OUTPUT_VALUE:
+      state->gpio_state->b_output_value =
+          apply_masked_value(state->gpio_state->b_output_value, mask, value);
+      return;
+    case PP5020_GPIO_D_OUTPUT_VALUE:
+      state->gpio_state->d_output_value =
+          apply_masked_value(state->gpio_state->d_output_value, mask, value);
+      return;
+    default:
   }
-
   assert(false);
 }
 

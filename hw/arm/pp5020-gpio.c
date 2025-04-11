@@ -9,8 +9,8 @@ static uint64_t pp5020_gpio_read(void *opaque, hwaddr addr, unsigned size) {
   PP5020GpioState *state = PP5020_GPIO(opaque);
 
   switch (addr) {
-    case GPIOA_INPUT_OFFSET:
-      return state->gpioa;
+    case PP5020_GPIO_A_INPUT_VALUE:
+      return state->a_input_value;
   }
 
   assert(false);
@@ -34,7 +34,13 @@ static const MemoryRegionOps pp5020_gpio_ops = {
 static void pp5020_gpio_init(Object *obj) {
   PP5020GpioState *state = PP5020_GPIO(obj);
 
-  state->gpioa = 0xffffffff;
+  state->b_enabled = 0;
+  state->d_enabled = 0;
+  state->b_output_enabled = 0;
+  state->d_output_enabled = 0;
+  state->b_output_value = 0;
+  state->d_output_value = 0;
+  state->a_input_value = 0xffffffff;
 
   SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
