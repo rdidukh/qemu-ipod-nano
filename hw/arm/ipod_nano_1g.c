@@ -1,6 +1,7 @@
 #include "hw/arm/ipod_nano_1g.h"
 
 #include "exec/address-spaces.h"
+#include "hw/arm/pp5020-ata-ctrl.h"
 #include "hw/arm/pp5020-cache-ctrl.h"
 #include "hw/arm/pp5020-gpio-bitwise.h"
 #include "hw/arm/pp5020-gpio.h"
@@ -79,7 +80,12 @@ static void ipod_nano_1g_init(MachineState *machine) {
   memory_region_add_subregion(get_system_memory(),
                               PP5020_MEMORY_CONTROL_BASE_ADDR, mem_ctrl);
 
-  DeviceState *dev = qdev_new(TYPE_PP5020_PROC_ID);
+  DeviceState *dev = qdev_new(TYPE_PP5020_ATA_CTRL);
+  PP5020AtaCtrlState *ata_ctrl_state = PP5020_ATA_CTRL(dev);
+  memory_region_add_subregion(get_system_memory(), PP5020_ATA_CTRL_BASE_ADDR,
+                              &ata_ctrl_state->iomem);
+
+  dev = qdev_new(TYPE_PP5020_PROC_ID);
   PP5020ProcIdState *proc_id_state = PP5020_PROC_ID(dev);
   memory_region_add_subregion(get_system_memory(), PP5020_PROC_ID_BASE_ADDR,
                               &proc_id_state->iomem);
