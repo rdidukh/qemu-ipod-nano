@@ -12,7 +12,11 @@
 #include "hw/arm/pp5020-proc-ctrl.h"
 #include "hw/arm/pp5020-proc-id.h"
 #include "hw/arm/pp5020-timer.h"
+#include "hw/ide/ahci-sysbus.h"
+#include "hw/ide/ide-bus.h"
+#include "hw/ide/ide-dev.h"
 #include "hw/loader.h"
+#include "hw/sysbus.h"
 #include "qapi/error.h"
 #include "qemu/datadir.h"
 #include "qemu/error-report.h"
@@ -81,11 +85,27 @@ static void ipod_nano_1g_init(MachineState *machine) {
   memory_region_add_subregion(get_system_memory(),
                               PP5020_MEMORY_CONTROL_BASE_ADDR, mem_ctrl);
 
-  DeviceState *dev = qdev_new(TYPE_PP5020_ATA);
-  PP5020AtaState *ata_state = PP5020_ATA(dev);
-  memory_region_add_subregion(get_system_memory(), PP5020_ATA_BASE_ADDR,
-                              &ata_state->iomem);
+  DeviceState *dev;
 
+#if 0
+  dev = qdev_new(TYPE_SYSBUS_AHCI);
+  qdev_prop_set_uint32(dev, "num-ports", 1);
+  SysbusAHCIState *ahci_state = SYSBUS_AHCI(dev);
+  sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
+  //sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, PP5020_ATA_BASE_ADDR);
+
+  DriveInfo *hd[1];
+  info_report("  ARRAY_SIZE(hd)=%ld", ARRAY_SIZE(hd));
+  ide_drive_get(hd, ARRAY_SIZE(hd));
+  info_report("  hd[0]=%p", hd[0]);
+
+  ahci_ide_create_devs(&ahci_state->ahci, hd);
+    */
+
+  // dev = qdev_new("ide-hd");
+  // IDEDevice *ata_state = IDE_DEVICE(dev);
+  // qdev_realize_and_unref(dev, ahci_state->, &error_fatal);
+#endif
   dev = qdev_new(TYPE_PP5020_ATA_CTRL);
   PP5020AtaCtrlState *ata_ctrl_state = PP5020_ATA_CTRL(dev);
   memory_region_add_subregion(get_system_memory(), PP5020_ATA_CTRL_BASE_ADDR,
@@ -124,9 +144,11 @@ static void ipod_nano_1g_init(MachineState *machine) {
                               &i2c_state->iomem);
 
   dev = qdev_new(TYPE_PP5020_IDE);
-  PP5020IdeState *ide_state = PP5020_IDE(dev);
-  memory_region_add_subregion(get_system_memory(), PP5020_IDE_BASE_ADDR,
-                              &ide_state->iomem);
+  // PP5020IdeState *ide_state = PP5020_IDE(dev);
+  sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
+  sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, PP5020_IDE_BASE_ADDR);
+  // memory_region_add_subregion(get_system_memory(), PP5020_IDE_BASE_ADDR,
+  //                             &ide_state->iomem);
 
   dev = qdev_new(TYPE_PP5020_IDE_DMA);
   PP5020IdeDmaState *ide_dma_state = PP5020_IDE_DMA(dev);

@@ -77,6 +77,7 @@ static void sysbus_ahci_class_init(ObjectClass *klass, void *data)
     set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
 }
 
+//
 static const TypeInfo sysbus_ahci_types[] = {
     {
         .name          = TYPE_SYSBUS_AHCI,

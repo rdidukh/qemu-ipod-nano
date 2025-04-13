@@ -10,6 +10,7 @@
 #include "hw/sysbus.h"
 #include "hw/ide/ahci.h"
 
+//
 #define TYPE_SYSBUS_AHCI "sysbus-ahci"
 OBJECT_DECLARE_SIMPLE_TYPE(SysbusAHCIState, SYSBUS_AHCI)
 
