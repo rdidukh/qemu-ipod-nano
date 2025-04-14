@@ -1,6 +1,7 @@
 #include "hw/arm/ipod_nano_1g.h"
 
 #include "exec/address-spaces.h"
+#include "hw/arm/hd66789r-lcd.h"
 #include "hw/arm/pp5020-ata-ctrl.h"
 #include "hw/arm/pp5020-cache-ctrl.h"
 #include "hw/arm/pp5020-gpio-bitwise.h"
@@ -85,6 +86,11 @@ static void ipod_nano_1g_init(MachineState *machine) {
                               PP5020_MEMORY_CONTROL_BASE_ADDR, mem_ctrl);
 
   DeviceState *dev;
+
+  dev = qdev_new(TYPE_HD66789R_LCD);
+  Hd66789rLcdState *lcd_state = HD66789R_LCD(dev);
+  memory_region_add_subregion(get_system_memory(), HD66789R_LCD_BASE_ADDR,
+                              &lcd_state->iomem);
 
   dev = qdev_new(TYPE_PP5020_ATA_CTRL);
   PP5020AtaCtrlState *ata_ctrl_state = PP5020_ATA_CTRL(dev);
