@@ -1,7 +1,6 @@
 #include "hw/arm/pp5020-ata-ctrl.h"
 
 #include "cpu.h"
-#include "hw/arm/pp5020-ata.h"
 #include "qemu/error-report.h"
 
 static uint64_t pp5020_ata_ctrl_read(void *opaque, hwaddr addr, unsigned size) {

@@ -2,7 +2,6 @@
 
 #include "exec/address-spaces.h"
 #include "hw/arm/pp5020-ata-ctrl.h"
-#include "hw/arm/pp5020-ata.h"
 #include "hw/arm/pp5020-cache-ctrl.h"
 #include "hw/arm/pp5020-gpio-bitwise.h"
 #include "hw/arm/pp5020-gpio.h"
@@ -12,7 +11,11 @@
 #include "hw/arm/pp5020-proc-ctrl.h"
 #include "hw/arm/pp5020-proc-id.h"
 #include "hw/arm/pp5020-timer.h"
+#include "hw/ide/ahci-sysbus.h"
+#include "hw/ide/ide-bus.h"
+#include "hw/ide/ide-dev.h"
 #include "hw/loader.h"
+#include "hw/sysbus.h"
 #include "qapi/error.h"
 #include "qemu/datadir.h"
 #include "qemu/error-report.h"
@@ -81,10 +84,7 @@ static void ipod_nano_1g_init(MachineState *machine) {
   memory_region_add_subregion(get_system_memory(),
                               PP5020_MEMORY_CONTROL_BASE_ADDR, mem_ctrl);
 
-  DeviceState *dev = qdev_new(TYPE_PP5020_ATA);
-  PP5020AtaState *ata_state = PP5020_ATA(dev);
-  memory_region_add_subregion(get_system_memory(), PP5020_ATA_BASE_ADDR,
-                              &ata_state->iomem);
+  DeviceState *dev;
 
   dev = qdev_new(TYPE_PP5020_ATA_CTRL);
   PP5020AtaCtrlState *ata_ctrl_state = PP5020_ATA_CTRL(dev);
@@ -125,6 +125,7 @@ static void ipod_nano_1g_init(MachineState *machine) {
 
   dev = qdev_new(TYPE_PP5020_IDE);
   PP5020IdeState *ide_state = PP5020_IDE(dev);
+  sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
   memory_region_add_subregion(get_system_memory(), PP5020_IDE_BASE_ADDR,
                               &ide_state->iomem);
 

@@ -6,13 +6,13 @@
 #include "qemu/osdep.h"
 // clang-format on
 
-#include "hw/arm/pp5020-ata.h"
 #include "hw/arm/pp5020-ide.h"
 #include "hw/sysbus.h"
 
 #define TYPE_PP5020_ATA_CTRL "pp5020-ata-ctrl"
 OBJECT_DECLARE_SIMPLE_TYPE(PP5020AtaCtrlState, PP5020_ATA_CTRL)
 
+#define PP5020_ATA_STATUS_READY 0x40
 #define PP5020_ATA_CTRL_BASE_ADDR PP5020_IDE_BASE_ADDR + 0x3f8
 #define PP5020_ATA_CTRL_MEM_SIZE 0x4
 

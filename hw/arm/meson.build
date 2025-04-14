@@ -65,7 +65,6 @@ arm_ss.add(when: 'CONFIG_XEN', if_true: files(
 ))
 arm_ss.add(when: 'CONFIG_IPOD_NANO_1G', if_true: files(
   'ipod_nano_1g.c', 
-  'pp5020-ata.c',
   'pp5020-ata-ctrl.c',
   'pp5020-cache-ctrl.c',
   'pp5020-gpio.c', 
